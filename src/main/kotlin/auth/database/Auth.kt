@@ -1,5 +1,7 @@
 package com.example.auth.database
 
+import com.example.profile.UserDto
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.Table
 
 object Users : Table() {
@@ -21,3 +23,12 @@ object Tokens : Table() {
 
     override val primaryKey = PrimaryKey(id)
 }
+
+fun ResultRow.asUserDto() = UserDto(
+    id = get(Users.id),
+    name = get(Users.name).orEmpty(),
+    login = get(Users.login),
+    age = get(Users.age),
+    target = get(Users.target).orEmpty(),
+    avatar = get(Users.avatarUrl)
+)

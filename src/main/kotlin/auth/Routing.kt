@@ -1,18 +1,32 @@
 package com.example.auth
 
-import com.example.auth.models.AuthResponse
 import com.example.auth.models.LogoutRequest
 import com.example.auth.models.RegisterRequest
 import com.example.auth.service.AuthService
-import com.example.base.Response
+import com.example.profile.getUserByToken
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Application.authRouting() {
     val authService = AuthService()
+
+    install(Authentication) {
+        bearer {
+            authenticate { credentials ->
+                val user = getUserByToken(credentials.token)
+
+                if (user != null) {
+                    credentials.token
+                } else {
+                    null
+                }
+            }
+        }
+    }
 
     routing {
         route("auth") {
@@ -32,7 +46,7 @@ fun Application.authRouting() {
                 try {
                     val request = call.receive<LogoutRequest>()
                     authService.logout(request)
-                    call.respond(HttpStatusCode.OK)
+                    call.respond("")
                 } catch (e: Exception) {
                     call.respond(HttpStatusCode.BadRequest, e.message ?: "Unknown error")
                 }

@@ -1,4 +1,4 @@
-package com.example.base
+package com.example.common
 
 sealed interface Response<out T> {
     data class Success<out T>(val data: T) : Response<T>

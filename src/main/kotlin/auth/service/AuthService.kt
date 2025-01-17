@@ -2,11 +2,12 @@ package com.example.auth.service
 
 import com.example.auth.database.Tokens
 import com.example.auth.database.Users
+import com.example.auth.database.asUserDto
 import com.example.auth.models.AuthResponse
 import com.example.auth.models.LogoutRequest
 import com.example.auth.models.RegisterRequest
-import com.example.base.Response
-import com.example.base.query
+import com.example.common.Response
+import com.example.common.query
 import com.example.profile.UserDto
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
@@ -64,14 +65,7 @@ class AuthService {
             it[userId] = user[Users.id]
             it[token] = newToken
         }
-        val userDto = UserDto(
-            id = user[Users.id],
-            name = user[Users.name].orEmpty(),
-            login = user[Users.login],
-            age = user[Users.age],
-            target = user[Users.target].orEmpty(),
-            avatar = user[Users.avatarUrl]
-        )
+        val userDto = user.asUserDto()
         Response.Success(AuthResponse(userDto, newToken))
     }
 

@@ -16,20 +16,6 @@ import java.util.*
 fun Application.profileRouting() {
     val profileService = ProfileService()
 
-    install(Authentication) {
-        bearer {
-            authenticate { credentials ->
-                val user = profileService.getUserByToken(credentials.token)
-
-                if (user != null) {
-                    credentials.token
-                } else {
-                    null
-                }
-            }
-        }
-    }
-
     routing {
         get("/avatars/{filename}") {
             val fileName = call.parameters["filename"] ?: return@get call.respond(HttpStatusCode.BadRequest)

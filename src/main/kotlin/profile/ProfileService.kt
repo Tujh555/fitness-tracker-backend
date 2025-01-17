@@ -2,8 +2,9 @@ package com.example.profile
 
 import com.example.auth.database.Tokens
 import com.example.auth.database.Users
-import com.example.base.Response
-import com.example.base.query
+import com.example.auth.database.asUserDto
+import com.example.common.Response
+import com.example.common.query
 import io.ktor.util.cio.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.Dispatchers
@@ -12,40 +13,28 @@ import net.coobird.thumbnailator.Thumbnails
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import java.io.File
-import java.io.InputStream
-import java.nio.file.Files
 import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
 import java.util.*
 
-class ProfileService {
-    suspend fun getUserByToken(token: String): UserDto? {
-        val user = query {
-            val tokenEntity = Tokens
-                .selectAll()
-                .where { Tokens.token eq token }
-                .firstOrNull()
-                ?: return@query null
+suspend fun getUserByToken(token: String): UserDto? {
+    val user = query {
+        val tokenEntity = Tokens
+            .selectAll()
+            .where { Tokens.token eq token }
+            .firstOrNull()
+            ?: return@query null
 
-            val userEntity = Users
-                .selectAll()
-                .where { Users.id eq tokenEntity[Tokens.userId] }
-                .firstOrNull()
-                ?: return@query null
-
-            UserDto(
-                id = userEntity[Users.id],
-                name = userEntity[Users.name].orEmpty(),
-                login = userEntity[Users.login],
-                age = userEntity[Users.age],
-                target = userEntity[Users.target].orEmpty(),
-                avatar = userEntity[Users.avatarUrl]
-            )
-        }
-
-        return user
+        Users
+            .selectAll()
+            .where { Users.id eq tokenEntity[Tokens.userId] }
+            .firstOrNull()
+            ?: return@query null
     }
 
+    return user?.asUserDto()
+}
+
+class ProfileService {
     suspend fun editProfile(token: String, request: EditProfileRequest): Response<UserDto> {
         val user = getUserByToken(token) ?: return Response.Error(404, "Пользователь не найден")
 

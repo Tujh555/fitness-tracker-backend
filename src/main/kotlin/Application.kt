@@ -2,6 +2,7 @@ package com.example
 
 import com.example.auth.authRouting
 import com.example.profile.profileRouting
+import com.example.workout.routing.workoutRouting
 import io.ktor.serialization.gson.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.*
@@ -17,4 +18,5 @@ fun Application.module() {
     configureDatabases()
     authRouting()
     profileRouting()
+    workoutRouting()
 }
