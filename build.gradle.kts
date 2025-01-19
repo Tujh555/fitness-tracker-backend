@@ -35,7 +35,6 @@ dependencies {
     implementation(libs.hikari)
     implementation(libs.jbcrypt)
     implementation(libs.thumbnailator)
-    implementation(libs.logback.classic)
     implementation(libs.ktor.serialization.gson)
 
     implementation(libs.ktor.server.config.yaml)

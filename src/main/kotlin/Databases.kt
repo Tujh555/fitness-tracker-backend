@@ -4,6 +4,7 @@ import com.example.auth.database.Tokens
 import com.example.auth.database.Users
 import com.example.workout.database.Approaches
 import com.example.workout.database.Exercises
+import com.example.workout.database.WorkoutCrossRef
 import com.example.workout.database.Workouts
 import io.ktor.server.application.*
 import org.jetbrains.exposed.sql.Database
@@ -16,7 +17,7 @@ fun Application.configureDatabases(): Database {
         driver = "org.h2.Driver"
     )
     transaction(database) {
-        SchemaUtils.create(Users, Tokens, Workouts, Exercises, Approaches)
+        SchemaUtils.create(Users, Tokens, Workouts, Exercises, Approaches, WorkoutCrossRef)
     }
 
     return database

@@ -341,7 +341,7 @@ class WorkoutService {
         writeChannel.flushAndClose()
         val thumbnailPath = "${exercisesDir}/${UUID.randomUUID()}_thumbnail.$fileExtension"
         Thumbnails.of(pathToSave).size(300, 300).toFile(File(thumbnailPath))
-        return "http://localhost:8080/$thumbnailPath"
+        return "http://0.0.0.0:8080/$thumbnailPath"
     }
 
     private data class SummaryData(

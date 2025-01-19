@@ -78,7 +78,7 @@ class ProfileService {
         val thumbnailPath = "${avatarsDir}/${UUID.randomUUID()}_thumbnail.$fileExtension"
         Thumbnails.of(pathToSave).size(500, 500).toFile(File(thumbnailPath))
 
-        val imageUrl = "http://localhost:8080/$thumbnailPath" // TODO: Change for the server
+        val imageUrl = "http://0.0.0.0:8080/$thumbnailPath"
         val updated = query {
             Users.update({ Users.id eq user.id }) {
                 it[avatarUrl] = imageUrl
