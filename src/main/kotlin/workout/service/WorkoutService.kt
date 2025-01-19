@@ -268,9 +268,9 @@ class WorkoutService {
         return Response.Success(dto)
     }
 
-    suspend fun getExercises(token: String): List<ExerciseDto> {
-        val user = getUserByToken(token) ?: return emptyList()
-        return Exercises.selectAll().where { Exercises.userId eq user.id }.map { row ->
+    suspend fun getExercises(token: String): List<ExerciseDto> = query {
+        val user = getUserByToken(token) ?: return@query emptyList()
+        Exercises.selectAll().where { Exercises.userId eq user.id }.map { row ->
             ExerciseDto(
                 id = row[Exercises.id].toString(),
                 title = row[Exercises.title],

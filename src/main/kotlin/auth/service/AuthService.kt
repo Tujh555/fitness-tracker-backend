@@ -31,6 +31,8 @@ class AuthService {
         val userInsert = Users.insert {
             it[login] = request.login
             it[password] = hashedPassword
+            request.age?.let { age -> it[Users.age] = age }
+            request.name?.let { name -> it[Users.name] = name }
         }
         val newToken = UUID.randomUUID().toString()
 

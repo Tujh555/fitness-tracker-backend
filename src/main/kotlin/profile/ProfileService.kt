@@ -15,6 +15,7 @@ import org.jetbrains.exposed.sql.update
 import java.io.File
 import java.nio.file.Paths
 import java.util.*
+import javax.imageio.ImageIO
 
 suspend fun getUserByToken(token: String): UserDto? {
     val user = query {
@@ -62,23 +63,25 @@ class ProfileService {
 
     suspend fun uploadAvatar(token: String, channel: ByteReadChannel, name: String): Response<UserDto> {
         val user = getUserByToken(token) ?: return Response.Error(404, "Пользователь не найден")
-        val fileExtension = name.substringAfterLast(".", "").ifEmpty { "jpg" }
+        val fileExtension = name.substringAfterLast(".", "").ifEmpty { "jpeg" }
         val avatarFileName = "${UUID.randomUUID()}.$fileExtension"
         val avatarsDir = "avatars"
         val avatarPath = Paths.get(avatarsDir, avatarFileName).toString()
 
         val pathToSave = File(avatarPath)
 
+        val thumbnailPath = "${avatarsDir}/${UUID.randomUUID()}_thumbnail.$fileExtension"
         withContext(Dispatchers.IO) {
+            pathToSave.parentFile?.mkdirs()
+            pathToSave.createNewFile()
             val writeChannel = pathToSave.writeChannel()
             channel.copyAndClose(writeChannel)
             writeChannel.flushAndClose()
+            Thumbnails.of(ImageIO.read(pathToSave)).size(500, 500).toFile(File(thumbnailPath))
         }
 
-        val thumbnailPath = "${avatarsDir}/${UUID.randomUUID()}_thumbnail.$fileExtension"
-        Thumbnails.of(pathToSave).size(500, 500).toFile(File(thumbnailPath))
-
         val imageUrl = "http://0.0.0.0:8080/$thumbnailPath"
+        println("!!! image url = $imageUrl")
         val updated = query {
             Users.update({ Users.id eq user.id }) {
                 it[avatarUrl] = imageUrl

@@ -3,6 +3,7 @@ package com.example.auth
 import com.example.auth.models.LogoutRequest
 import com.example.auth.models.RegisterRequest
 import com.example.auth.service.AuthService
+import com.example.common.respondRes
 import com.example.profile.getUserByToken
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -13,6 +14,7 @@ import io.ktor.server.routing.*
 
 fun Application.authRouting() {
     val authService = AuthService()
+    println("--> auth route")
 
     install(Authentication) {
         bearer {
@@ -32,14 +34,18 @@ fun Application.authRouting() {
         route("auth") {
             post("/register") {
                 val request = call.receive<RegisterRequest>()
+                println("register; request = $request")
                 val response = authService.register(request)
-                call.respond(response)
+                println("response = $response")
+                call.respondRes(response)
             }
 
             post("/login") {
                 val request = call.receive<RegisterRequest>()
+                println("login; request = $request")
                 val response = authService.login(request)
-                call.respond(response)
+                println("response = $response")
+                call.respondRes(response)
             }
 
             post("/logout") {

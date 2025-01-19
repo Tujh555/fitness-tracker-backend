@@ -1,5 +1,6 @@
 package com.example.profile
 
+import com.example.common.respondRes
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
@@ -34,10 +35,13 @@ fun Application.profileRouting() {
                 post("/avatar") {
                     val token = call.principal<String>()!!
 
+                    println("token = $token")
+                    println("load avatar")
                     val filePart = call
                         .receiveMultipart()
                         .asFlow()
                         .onEach { part ->
+                            println("$part")
                             if (part !is PartData.FileItem) {
                                 part.dispose()
                             }
@@ -46,15 +50,20 @@ fun Application.profileRouting() {
                         .first()
 
                     val fileName = filePart.originalFileName ?: UUID.randomUUID().toString()
-                    val response = profileService.uploadAvatar(token, filePart.provider(), fileName)
-                    call.respond(response)
+                    println("--> filename = $fileName")
+                    try {
+                        val response = profileService.uploadAvatar(token, filePart.provider(), fileName)
+                        call.respondRes(response)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
 
                 post("/edit") {
                     val token = call.principal<String>()!!
                     val request = call.receive<EditProfileRequest>()
                     val response = profileService.editProfile(token, request)
-                    call.respond(response)
+                    call.respondRes(response)
                 }
             }
         }

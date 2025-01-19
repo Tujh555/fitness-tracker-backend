@@ -17,6 +17,7 @@ application {
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
@@ -36,6 +37,8 @@ dependencies {
     implementation(libs.jbcrypt)
     implementation(libs.thumbnailator)
     implementation(libs.ktor.serialization.gson)
+    implementation("com.github.jai-imageio:jai-imageio-core:1.4.0")
+    implementation("com.github.jai-imageio:jai-imageio-jpeg2000:1.4.0")
 
     implementation(libs.ktor.server.config.yaml)
     testImplementation(libs.ktor.server.test.host)

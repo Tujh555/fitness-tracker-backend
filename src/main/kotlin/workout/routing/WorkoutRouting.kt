@@ -1,5 +1,6 @@
 package com.example.workout.routing
 
+import com.example.common.respondRes
 import com.example.workout.WorkoutDto
 import com.example.workout.service.WorkoutService
 import io.ktor.http.*
@@ -62,7 +63,7 @@ fun Application.workoutRouting() {
                         token = token
                     )
 
-                    call.respond(exercise)
+                    call.respondRes(exercise)
                 }
 
                 get("/all") {
@@ -83,13 +84,13 @@ fun Application.workoutRouting() {
                     val token = call.principal<String>()!!
                     val workout = call.receive<WorkoutDto>()
                     val created = workoutService.createWorkout(token, workout)
-                    call.respond(created)
+                    call.respondRes(created)
                 }
 
                 put {
                     val workout = call.receive<WorkoutDto>()
                     val updated = workoutService.editWorkout(workout)
-                    call.respond(updated)
+                    call.respondRes(updated)
                 }
             }
 
