@@ -31,20 +31,21 @@ fun Application.workoutRouting() {
 
         authenticate {
             route("/exercises") {
-                post("/{id}") {
+                post {
                     val token = call.principal<String>()!!
-                    val id = call.parameters["id"]
 
                     val multipart = call.receiveMultipart()
                     var photo: PartData.FileItem? = null
                     var title: String? = null
+                    var id: String? = null
 
                     multipart.forEachPart { part ->
                         when (part) {
                             is PartData.FileItem -> photo = part
 
-                            is PartData.FormItem -> if (part.name == "title") {
-                                title = part.value
+                            is PartData.FormItem -> when (part.name) {
+                                "title" -> title = part.value
+                                "id" -> id = part.value
                             }
 
                             is PartData.BinaryChannelItem,
@@ -52,14 +53,10 @@ fun Application.workoutRouting() {
                         }
                     }
 
-                    if (title == null) {
-                        return@post call.respond(HttpStatusCode.BadRequest, "Missing title")
-                    }
-
                     val exercise = workoutService.createOrEditExercise(
                         id = id?.let(UUID::fromString),
                         photo = photo,
-                        title = title.orEmpty(),
+                        title = title,
                         token = token
                     )
 
@@ -81,10 +78,14 @@ fun Application.workoutRouting() {
                 }
 
                 post {
-                    val token = call.principal<String>()!!
-                    val workout = call.receive<WorkoutDto>()
-                    val created = workoutService.createWorkout(token, workout)
-                    call.respondRes(created)
+                    try {
+                        val token = call.principal<String>()!!
+                        val workout = call.receive<WorkoutDto>()
+                        val created = workoutService.createWorkout(token, workout)
+                        call.respondRes(created)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
 
                 put {

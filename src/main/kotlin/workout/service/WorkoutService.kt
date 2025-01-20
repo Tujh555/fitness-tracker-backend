@@ -61,7 +61,7 @@ class WorkoutService {
                     WorkoutData(
                         workoutId = workoutId,
                         workoutTitle = workoutTitle,
-                        workoutDate = workoutDate,
+                        workoutDate = Instant.ofEpochMilli(workoutDate),
                         exerciseId = exerciseId,
                         exerciseTitle = exerciseTitle,
                         exerciseDescribingPhoto = exerciseDescribingPhoto,
@@ -113,7 +113,7 @@ class WorkoutService {
                 .map { row ->
                     SummaryData(
                         workoutId = row[Workouts.id],
-                        workoutDate = row[Workouts.date],
+                        workoutDate = Instant.ofEpochMilli(row[Workouts.date]),
                         weight = row[Approaches.weight],
                         repetitions = row[Approaches.repetitions]
                     )
@@ -138,19 +138,23 @@ class WorkoutService {
 
     suspend fun editWorkout(workoutDto: WorkoutDto): Response<WorkoutDto> {
         val workoutId = workoutDto.id?.let(UUID::fromString) ?: UUID.randomUUID()
-        val existing = Workouts
-            .selectAll()
-            .where { Workouts.id eq workoutId }
-            .firstOrNull()
+
+        val existing = query {
+            Workouts
+                .selectAll()
+                .where { Workouts.id eq workoutId }
+                .firstOrNull()
+        }
 
         if (existing == null) {
             return Response.Error(404, "Not found")
         }
 
         val dto = query {
+
             Workouts.update({ Workouts.id eq workoutId }) {
                 it[title] = workoutDto.title
-                it[date] = Instant.parse(workoutDto.date)
+                it[date] = Instant.parse(workoutDto.date).toEpochMilli()
             }
 
             workoutDto.exercises.forEach { exerciseDto ->
@@ -204,7 +208,7 @@ class WorkoutService {
             val workout = Workouts.insert {
                 it[userId] = user.id
                 it[title] = workoutDto.title
-                it[date] = Instant.parse(workoutDto.date)
+                it[date] = Instant.parse(workoutDto.date).toEpochMilli()
             }
 
             val exercises = workoutDto.exercises.map { exerciseDto ->
@@ -283,7 +287,7 @@ class WorkoutService {
     suspend fun createOrEditExercise(
         id: UUID?,
         photo: PartData.FileItem?,
-        title: String,
+        title: String?,
         token: String
     ): Response<ExerciseDto> = query {
         val user = getUserByToken(token) ?: return@query Response.Error(401, "Вы не авторизованы")
@@ -292,7 +296,7 @@ class WorkoutService {
 
         if (existing == null) {
             val statement = Exercises.insert {
-                it[Exercises.title] = title
+                it[Exercises.title] = title ?: "Не задано"
                 it[describingPhoto] = savedPhoto
                 it[userId] = user.id
             }
@@ -308,7 +312,9 @@ class WorkoutService {
         }
 
         Exercises.update({ Exercises.id eq id }) {
-            it[Exercises.title] = title
+            if (title != null) {
+                it[Exercises.title] = title
+            }
             if (savedPhoto != null) {
                 it[describingPhoto] = savedPhoto
             }
